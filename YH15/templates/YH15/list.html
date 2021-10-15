@@ -1,0 +1,19 @@
+<table border="1">
+    <tr>
+        <td>Index</td>
+        <td>Bar Name</td>
+        <td>Rating</td>
+        <td>Capacity</td>
+        <td>Occupancy</td>
+    </tr>
+    {% for bar in bar_list %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><a href="/YH15/{{ bar.id }}/">{{ bar.bar_name }}</a></td>
+        <td>{{ bar.bar_rating }}</td>
+        <td>{{ bar.bar_capacity }}</td>
+        <td>{{ bar.bar_occupancy }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
