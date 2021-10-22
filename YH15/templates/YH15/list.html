@@ -5,7 +5,8 @@
 
 <form action="{% url 'search' %}" method="GET">
     {%  csrf_token %}
-  <input name="name" type="text" placeholder="Search for name">
+    Search:
+  <input name="name" type="text" placeholder="Search by name...">
 </form>
 <br>
 
@@ -29,6 +30,10 @@
             <option value="rating">Rating</option>
             <option value="capacity">Capacity</option>
             <option value="occupancy">Occupancy</option>
+        </select>
+        <select name="sort_order">
+            <option value="low_high">Low to High</option>
+            <option value="high_low">High to Low</option>
         </select>
     <input type="submit" value="Sort">
 </form>

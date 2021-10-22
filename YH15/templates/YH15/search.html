@@ -5,12 +5,17 @@
 </head>
 <body>
 
+
 <form method="GET" action="{% url 'sort' %}">
     {% csrf_token %}
         <select name="sort_type">
             <option value="rating">Rating</option>
             <option value="capacity">Capacity</option>
             <option value="occupancy">Occupancy</option>
+        </select>
+        <select name="sort_order">
+            <option value="low_high">Low to High</option>
+            <option value="high_low">High to Low</option>
         </select>
     <input type="submit" value="Sort">
 </form>
