@@ -3,10 +3,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # ex: /YH15/
     path('', views.list, name='list'),
-    # ex: /YH15/5/
+    path('search/', views.search, name='search'),
+    path('sort/', views.sort, name='sort'),
+    path('filter/', views.bar_filter, name='filter'),
     path('<int:bar_id>/', views.details, name='detail'),
-    # ex: /YH15/5/info/
-    path('<int:bar_id>/info/', views.info, name='info'),
 ]
