@@ -8,6 +8,19 @@
 <a class="btn btn-primary" href="/YH15/">Back to Homepage</a>
 <br>
 <br>
+
+<form action="{% url 'filter' %}" method="GET">
+    {%  csrf_token %}
+    Rating:
+    <input name="rating" type="number" min="0" max="5" step="0.5">
+    Capacity:
+    <input name="capacity" type="number" min="0" step="10">
+    Occupancy:
+    <input name="occupancy" type="number" min="0" step="10">
+    <input type="submit" value="Filter">
+</form>
+<br>
+
 <form method="GET" action="{% url 'sort' %}">
     {% csrf_token %}
         <select name="sort_type">
