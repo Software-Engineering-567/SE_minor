@@ -3,9 +3,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.list, name='list'),
-    path('search/', views.search, name='search'),
-    path('sort/', views.sort, name='sort'),
-    path('filter/', views.bar_filter, name='filter'),
-    path('<int:bar_id>/', views.details, name='detail'),
+    path('', views.ListBarView.as_view(), name='list'),
+    path('search/', views.SearchBarView.as_view(), name='search'),
+    path('sort/', views.sort_bars, name='sort'),
+    path('filter/', views.filter_bar, name='filter'),
+    path('<int:bar_id>/', views.get_bar_details, name='detail'),
 ]

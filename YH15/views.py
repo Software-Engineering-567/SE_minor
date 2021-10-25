@@ -1,7 +1,10 @@
 from django.http import HttpResponse
 from django.template import loader
+from django.db.models.query import QuerySet
 from django.db.models import Q
 from YH15.models import Bar
+from django.views.generic import DetailView
+from typing import List
 
 # To save a search user request, prepare for a possible next user request
 BAR_SEARCH = None
@@ -9,40 +12,49 @@ BAR_SEARCH = None
 BAR_FILTER = None
 
 # Generates list: all available bars
-def list(request):
-    # Reset previous search request, because we are querying for all()
-    global BAR_SEARCH
-    BAR_SEARCH = None
-    # Reset previous search request, because we are querying for all()
-    global BAR_FILTER
-    BAR_FILTER = None
-    # Query for all available bars, send the result in 'context' to list.html
-    bar_list = Bar.objects.order_by('-bar_rating')[:]
-    template = loader.get_template('YH15/list.html')
-    context = {
-        'bar_list': bar_list,
-    }
-    return HttpResponse(template.render(context, request))
+class ListBarView(DetailView):
+    DEFAULT_TEMPLATE = 'YH15/list.html'
 
-# Generates list: search-resulted bars
-def search(request):
-    # Get and save the search information from current request
-    query = request.GET.get('name')
-    global BAR_SEARCH
-    BAR_SEARCH = query
-    # Query the bars with search conditions
-    bar_list = Bar.objects.filter(
-        Q(bar_name__icontains=query)
-    )
-    bar_list = bar_list.order_by('-bar_name')[:]
-    template = loader.get_template('YH15/search.html')
-    context = {
-        'bar_list': bar_list,
-    }
-    return HttpResponse(template.render(context, request))
+    @staticmethod
+    def get_default_bars() -> QuerySet:
+        """Get all the bars sorted by bar rating by default."""
+        return Bar.objects.order_by('-bar_rating')[:]
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        # Reset previous search request, because we are querying for all()
+        global BAR_SEARCH
+        BAR_SEARCH = None
+        # Reset previous search request, because we are querying for all()
+        global BAR_FILTER
+        BAR_FILTER = None
+        # Query for all available bars, send the result in 'context' to list.html
+        bar_list = ListBarView.get_default_bars()
+        template = loader.get_template(ListBarView.DEFAULT_TEMPLATE)
+        context = {
+            'bar_list': bar_list,
+        }
+        return HttpResponse(template.render(context, request))
+
+
+class SearchBarView(DetailView):
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        # Get and save the search information from current request
+        query = request.GET.get('name')
+        global BAR_SEARCH
+        BAR_SEARCH = query
+        # Query the bars with search conditions
+        bar_list = Bar.objects.filter(
+            Q(bar_name__icontains=query)
+        )
+        bar_list = bar_list.order_by('-bar_name')[:]
+        template = loader.get_template('YH15/search.html')
+        context = {
+            'bar_list': bar_list,
+        }
+        return HttpResponse(template.render(context, request))
 
 # Generates list: filter-resulted bars
-def to_filter(request):
+def to_filter(request) -> QuerySet:
     # Be prepare to check if the current filter-request should be based on a searched list
     global BAR_SEARCH
     bar_search = BAR_SEARCH
@@ -68,9 +80,9 @@ def to_filter(request):
             capacity = '0'
         if occupancy == '':
             occupancy = '0'
-        bar_list = bar_list.filter(bar_rating__range=(rating, 5))
-        bar_list = bar_list.filter(bar_capacity__range=(capacity, 99999))
-        bar_list = bar_list.filter(bar_occupancy__range=(occupancy, 99999))
+        bar_list = bar_list.filter(bar_rating__range=(rating, Bar.MAX_BAR_RATING))
+        bar_list = bar_list.filter(bar_capacity__range=(capacity, Bar.MAX_BAR_CAPACITY))
+        bar_list = bar_list.filter(bar_occupancy__range=(occupancy, Bar.MAX_BAR_CAPACITY))
     # If we have no input for all 3 definitions
     else:
         # Reset the filter information
@@ -80,7 +92,7 @@ def to_filter(request):
     return bar_list
 
 # Generates list: sort resulted list
-def sort(request):
+def sort_bars(request) -> HttpResponse:
     # Prepare to check if the current sort-request should be based on a searched or filtered list
     global BAR_SEARCH
     bar_search = BAR_SEARCH
@@ -113,7 +125,7 @@ def sort(request):
     return HttpResponse(template.render(context, request))
 
 
-def bar_filter(request):
+def filter_bar(request) -> HttpResponse:
     global BAR_FILTER
     BAR_FILTER = request
     bar_list = to_filter(request)
@@ -124,7 +136,7 @@ def bar_filter(request):
     return HttpResponse(template.render(context, request))
 
 
-def details(request, bar_id):
+def get_bar_details(request, bar_id: int) -> HttpResponse:
     bar = Bar.objects.get(id=bar_id)
     bar_name = bar.bar_name
     return HttpResponse("You're looking at bar %s." % bar_name)
