@@ -175,7 +175,6 @@ class RecommendBarView(DetailView):
         sorted_total_scores = sorted(secure_scores.items(), key=lambda item: item[1], reverse=True)
         return [x[0] for x in sorted_total_scores]
 
-
     @staticmethod
     def rank_secure_bars(bars: List[Bar]) -> Dict[Bar, int]:
         bar_secure_scores: Dict[Bar, int] = {bar: 0 for bar in bars}
@@ -219,5 +218,3 @@ class RecommendBarView(DetailView):
         if 0 < bar_popular_score <= 0.4:
             return 3
         return 0
-
-
