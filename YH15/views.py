@@ -24,11 +24,8 @@ class ListBarView(DetailView):
     DEFAULT_TEMPLATE: str = 'YH15/list.html'
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        # Reset previous search request, because we are querying for all()
         RequestHelper.reset_search_request()
-        # Reset previous search request, because we are querying for all()
         RequestHelper.reset_filter_request()
-
         return send_http_query(request, ListBarView.get_default_bars(), ListBarView.DEFAULT_TEMPLATE)
 
     @staticmethod
