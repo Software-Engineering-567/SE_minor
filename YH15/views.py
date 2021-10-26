@@ -12,7 +12,7 @@ from YH15.filter import BarFilter
 from YH15.request_helper import RequestHelper
 
 
-def send_http_query(request, bar_list: QuerySet, template: str) -> HttpResponse:
+def send_http_request(request, bar_list: QuerySet, template: str) -> HttpResponse:
     template = loader.get_template(template)
     context = {
         'bar_list': bar_list,
@@ -26,7 +26,7 @@ class ListBarView(DetailView):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         RequestHelper.reset_search_request()
         RequestHelper.reset_filter_request()
-        return send_http_query(request, ListBarView.get_default_bars(), ListBarView.DEFAULT_TEMPLATE)
+        return send_http_request(request, ListBarView.get_default_bars(), ListBarView.DEFAULT_TEMPLATE)
 
     @staticmethod
     def get_default_bars() -> QuerySet:
@@ -41,7 +41,7 @@ class SearchBarView(DetailView):
         query = request.GET.get('name')
         RequestHelper.cache_search_request(query)
 
-        return send_http_query(
+        return send_http_request(
             request,
             SearchBarView.search_bar_models(),
             SearchBarView.DEFAULT_TEMPLATE,
@@ -59,7 +59,7 @@ class SortBarView(DetailView):
     DEFAULT_TEMPLATE = 'YH15/sort.html'
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        return send_http_query(
+        return send_http_request(
             request,
             SortBarView.sort_bars(request),
             SortBarView.DEFAULT_TEMPLATE
@@ -88,7 +88,7 @@ class FilterBarView(DetailView):
     DEFAULT_TEMPLATE = 'YH15/filter.html'
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        return send_http_query(
+        return send_http_request(
             request,
             FilterBarView.filter_bars(request),
             SortBarView.DEFAULT_TEMPLATE,
@@ -104,7 +104,7 @@ class RecommendBarView(DetailView):
     DEFAULT_TEMPLATE = 'YH15/recommend.html'
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        return send_http_query(
+        return send_http_request(
             request,
             RecommendBarView.recommend_bars(request),
             RecommendBarView.DEFAULT_TEMPLATE,
