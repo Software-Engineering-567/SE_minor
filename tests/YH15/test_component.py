@@ -12,7 +12,7 @@ from YH15.views import (
 )
 
 from YH15 import views as views
-from YH15.query import RequestHelper
+from YH15.request_helper import RequestHelper
 
 
 class TestBarRecommendation(TestCase):
@@ -21,7 +21,7 @@ class TestBarRecommendation(TestCase):
         self.factory = RequestFactory()
 
     def test_bar_recommendation(self) -> None:
-        with patch("YH15.query.RequestHelper.get_current_bar_query",
+        with patch("YH15.request_helper.RequestHelper.get_current_bar_query",
                    MagicMock(
                        return_value=self.bar_list,
                    )

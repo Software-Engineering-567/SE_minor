@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from YH15.models import Bar, Numeric
 from YH15 import views as views
-from YH15.query import RequestHelper
+from YH15.request_helper import RequestHelper
 
 
 class BarFilter:

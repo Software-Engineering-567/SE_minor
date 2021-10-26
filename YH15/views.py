@@ -9,7 +9,7 @@ from django.views.generic import DetailView
 
 from YH15.models import Bar
 from YH15.filter import BarFilter
-from YH15.query import RequestHelper
+from YH15.request_helper import RequestHelper
 
 
 def send_http_query(request, bar_list: QuerySet, template: str) -> HttpResponse:
