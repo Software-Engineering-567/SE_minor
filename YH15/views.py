@@ -1,140 +1,131 @@
+import random
+from typing import List, Dict
+
 from django.http import HttpResponse
 from django.template import loader
 from django.db.models.query import QuerySet
 from django.db.models import Q
-from YH15.models import Bar
 from django.views.generic import DetailView
+
+from YH15.models import Bar
 from YH15.filter import BarFilter
-from typing import List, Dict
-import random
-
-BAR_SEARCH = None
-"""Cache the existing search request, prepare for a possible next user request."""
-
-BAR_FILTER = None
-"""Cache the existing filter request, prepare for a possible next user request."""
+from YH15.query import RequestHelper
 
 
-def get_current_bar_query() -> QuerySet:
-    """Return the cached filter or search query."""
-    global BAR_SEARCH
-    bar_search = BAR_SEARCH
-    global BAR_FILTER
-    bar_filter = BAR_FILTER
-    if bar_search is not None:
-        bar_list = Bar.objects.filter(
-            Q(bar_name__icontains=bar_search)
-        )
-    elif bar_filter is not None:
-        bar_list = BarFilter.filter_bars(BAR_FILTER)
-    else:
-        bar_list = Bar.objects.all()
-    return bar_list
+def send_http_query(request, bar_list: QuerySet, template: str) -> HttpResponse:
+    template = loader.get_template(template)
+    context = {
+        'bar_list': bar_list,
+    }
+    return HttpResponse(template.render(context, request))
 
 
 class ListBarView(DetailView):
-    DEFAULT_TEMPLATE = 'YH15/list.html'
+    DEFAULT_TEMPLATE: str = 'YH15/list.html'
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        # Reset previous search request, because we are querying for all()
+        RequestHelper.reset_search_request()
+        # Reset previous search request, because we are querying for all()
+        RequestHelper.reset_filter_request()
+
+        return send_http_query(request, ListBarView.get_default_bars(), ListBarView.DEFAULT_TEMPLATE)
 
     @staticmethod
     def get_default_bars() -> QuerySet:
         """Get all the bars sorted by bar rating by default."""
         return Bar.objects.order_by('-bar_rating')[:]
 
-    def get(self, request, *args, **kwargs) -> HttpResponse:
-        # Reset previous search request, because we are querying for all()
-        global BAR_SEARCH
-        BAR_SEARCH = None
-        # Reset previous search request, because we are querying for all()
-        BarFilter.reset_filter_query()
-        # Query for all available bars, send the result in 'context' to list.html
-        bar_list = ListBarView.get_default_bars()
-        template = loader.get_template(ListBarView.DEFAULT_TEMPLATE)
-        context = {
-            'bar_list': bar_list,
-        }
-        return HttpResponse(template.render(context, request))
-
 
 class SearchBarView(DetailView):
+    DEFAULT_TEMPLATE: str = 'YH15/search.html'
+
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        # Get and save the search information from current request
         query = request.GET.get('name')
-        global BAR_SEARCH
-        BAR_SEARCH = query
-        # Query the bars with search conditions
-        bar_list = Bar.objects.filter(
-            Q(bar_name__icontains=query)
+        RequestHelper.cache_search_request(query)
+
+        return send_http_query(
+            request,
+            SearchBarView.search_bar_models(),
+            SearchBarView.DEFAULT_TEMPLATE,
         )
-        bar_list = bar_list.order_by('-bar_name')[:]
-        template = loader.get_template('YH15/search.html')
-        context = {
-            'bar_list': bar_list,
-        }
-        return HttpResponse(template.render(context, request))
+
+    @staticmethod
+    def search_bar_models() -> QuerySet:
+        bar_list = Bar.objects.filter(
+            Q(bar_name__icontains=RequestHelper.bar_search_request)
+        )
+        return bar_list.order_by('-bar_name')[:]
 
 
 class SortBarView(DetailView):
     DEFAULT_TEMPLATE = 'YH15/sort.html'
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        return SortBarView.sort_bars(request)
+        return send_http_query(
+            request,
+            SortBarView.sort_bars(request),
+            SortBarView.DEFAULT_TEMPLATE
+        )
 
     @staticmethod
-    def sort_bars(request) -> HttpResponse:
-        # Prepare to check if the current sort-request should be based on a searched or filtered list.
-        bar_list = get_current_bar_query()
-        sort_type = request.GET.get('sort_type')
-        sort_order = request.GET.get('sort_order')
+    def get_sort_sort_order_and_type(request) -> List[str]:
+        return [
+            request.GET.get('sort_order'),
+            request.GET.get('sort_type'),
+        ]
+
+    @staticmethod
+    def sort_bars(request) -> QuerySet:
+        bar_list = RequestHelper.get_current_bar_query()
+
+        sort_order, sort_type = SortBarView.get_sort_sort_order_and_type(request)
+
         if sort_order == 'high_low':
-            bar_list = bar_list.order_by(f'-bar_{sort_type}')[:]
-        else:
-            bar_list = bar_list.order_by(f'-bar_{sort_type}')[::-1]
-        template = loader.get_template('YH15/sort.html')
-        context = {
-            'bar_list': bar_list,
-        }
-        return HttpResponse(template.render(context, request))
+            return bar_list.order_by(f'-bar_{sort_type}')[:]
+
+        return bar_list.order_by(f'-bar_{sort_type}')[::-1]
 
 
 class FilterBarView(DetailView):
     DEFAULT_TEMPLATE = 'YH15/filter.html'
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        return FilterBarView.filter_bars(request)
+        return send_http_query(
+            request,
+            FilterBarView.filter_bars(request),
+            SortBarView.DEFAULT_TEMPLATE,
+        )
 
     @staticmethod
-    def filter_bars(request) -> HttpResponse:
-        global BAR_FILTER
-        BAR_FILTER = request
-        bar_list = BarFilter.filter_bars(request)
-        context = {
-            'bar_list': bar_list,
-        }
-        template = loader.get_template(FilterBarView.DEFAULT_TEMPLATE)
-        return HttpResponse(template.render(context, request))
+    def filter_bars(request) -> QuerySet:
+        RequestHelper.cache_filter_request(request)
+        return BarFilter.filter_bars(request)
 
 
 class RecommendBarView(DetailView):
     DEFAULT_TEMPLATE = 'YH15/recommend.html'
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        return RecommendBarView.recommend_bars(request)
+        return send_http_query(
+            request,
+            RecommendBarView.recommend_bars(request),
+            RecommendBarView.DEFAULT_TEMPLATE,
+        )
 
     @staticmethod
-    def recommend_bars(request) -> HttpResponse:
-        bar_query = get_current_bar_query()
+    def recommend_bars(request, number: int = 1) -> QuerySet:
+        bar_query = RequestHelper.get_current_bar_query()
         bar_list = list(bar_query)
         random.shuffle(bar_list)
         bars = RecommendBarView.rank_bars(bar_list)
-        bar_name = bars[0].bar_name
-        bar = Bar.objects.filter(
-            Q(bar_name__iexact=bar_name)
+
+        if number > len(bars):
+            raise ValueError(f"Requested {number} bars than total {len(bars)} bars!")
+
+        return Bar.objects.filter(
+            Q(bar_name__in=[bar.bar_name for bar in bars[:number]])
         )
-        context = {
-            'bar_list': bar,
-        }
-        template = loader.get_template(RecommendBarView.DEFAULT_TEMPLATE)
-        return HttpResponse(template.render(context, request))
 
     @staticmethod
     def rank_bars(bars: List[Bar]) -> List[Bar]:

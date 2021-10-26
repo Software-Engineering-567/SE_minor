@@ -8,11 +8,11 @@ from YH15.views import (
     ListBarView,
     FilterBarView,
     SearchBarView,
-    BAR_SEARCH,
-    BAR_FILTER,
     RecommendBarView,
 )
+
 from YH15 import views as views
+from YH15.query import RequestHelper
 
 
 class TestBarRecommendation(TestCase):
@@ -21,7 +21,7 @@ class TestBarRecommendation(TestCase):
         self.factory = RequestFactory()
 
     def test_bar_recommendation(self) -> None:
-        with patch("YH15.views.get_current_bar_query",
+        with patch("YH15.query.RequestHelper.get_current_bar_query",
                    MagicMock(
                        return_value=self.bar_list,
                    )
@@ -43,8 +43,8 @@ class TestBarList(TestCase):
         request = self.factory.get("/YH15/")
         response = ListBarView().get(request)
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(BAR_SEARCH)
-        self.assertIsNone(BAR_FILTER)
+        self.assertIsNone(RequestHelper.bar_search_request)
+        self.assertIsNone(RequestHelper.bar_filter_request)
 
 
 class TestBarSearch(TestCase):
@@ -76,7 +76,7 @@ class TestBarFilter(TestCase):
         response = FilterBarView().get(request)
         self.assertEqual(response.status_code, 200)
 
-        views.BAR_SEARCH = None
+        views.BAR_SEARCH_QUERY = None
         request = self.factory.get("/YH15/filter/?rating=&capacity=&occupancy=100")
         response = FilterBarView().get(request)
         self.assertEqual(response.status_code, 200)
