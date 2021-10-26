@@ -110,32 +110,45 @@ def to_filter(request) -> QuerySet:
     return bar_list
 
 
-# Generates list: sort resulted list
-def sort_bars(request) -> HttpResponse:
-    # Prepare to check if the current sort-request should be based on a searched or filtered list
-    bar_list = get_current_bar_query()
-    sort_type = request.GET.get('sort_type')
-    sort_order = request.GET.get('sort_order')
-    if sort_order == 'high_low':
-        bar_list = bar_list.order_by(f'-bar_{sort_type}')[:]
-    else:
-        bar_list = bar_list.order_by(f'-bar_{sort_type}')[::-1]
-    template = loader.get_template('YH15/sort.html')
-    context = {
-        'bar_list': bar_list,
-    }
-    return HttpResponse(template.render(context, request))
+class SortBarView(DetailView):
+    DEFAULT_TEMPLATE = 'YH15/sort.html'
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        return SortBarView.sort_bars(request)
+
+    @staticmethod
+    def sort_bars(request) -> HttpResponse:
+        # Prepare to check if the current sort-request should be based on a searched or filtered list.
+        bar_list = get_current_bar_query()
+        sort_type = request.GET.get('sort_type')
+        sort_order = request.GET.get('sort_order')
+        if sort_order == 'high_low':
+            bar_list = bar_list.order_by(f'-bar_{sort_type}')[:]
+        else:
+            bar_list = bar_list.order_by(f'-bar_{sort_type}')[::-1]
+        template = loader.get_template('YH15/sort.html')
+        context = {
+            'bar_list': bar_list,
+        }
+        return HttpResponse(template.render(context, request))
 
 
-def filter_bars(request) -> HttpResponse:
-    global BAR_FILTER
-    BAR_FILTER = request
-    bar_list = to_filter(request)
-    context = {
-        'bar_list': bar_list,
-    }
-    template = loader.get_template('YH15/filter.html')
-    return HttpResponse(template.render(context, request))
+class FilterBarView(DetailView):
+    DEFAULT_TEMPLATE = 'YH15/filter.html'
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        return FilterBarView.filter_bars(request)
+
+    @staticmethod
+    def filter_bars(request) -> HttpResponse:
+        global BAR_FILTER
+        BAR_FILTER = request
+        bar_list = to_filter(request)
+        context = {
+            'bar_list': bar_list,
+        }
+        template = loader.get_template(FilterBarView.DEFAULT_TEMPLATE)
+        return HttpResponse(template.render(context, request))
 
 
 def get_bar_details(request, bar_id: int) -> HttpResponse:
@@ -151,7 +164,7 @@ class RecommendBarView(DetailView):
         return RecommendBarView.recommend_bars(request)
 
     @staticmethod
-    def recommend_bars(request, *args, **kwargs) -> HttpResponse:
+    def recommend_bars(request) -> HttpResponse:
         bar_query = get_current_bar_query()
         bar_list = list(bar_query)
         random.shuffle(bar_list)
