@@ -17,7 +17,12 @@ def send_http_request(request, bar_list: QuerySet, template: str) -> HttpRespons
     context = {
         'bar_list': bar_list,
     }
-    return HttpResponse(template.render(context, request))
+    return HttpResponse(
+        template.render(
+            context,
+            request
+        )
+    )
 
 
 class ListBarView(DetailView):
@@ -26,7 +31,11 @@ class ListBarView(DetailView):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         RequestHelper.reset_search_request()
         RequestHelper.reset_filter_request()
-        return send_http_request(request, ListBarView.get_default_bars(), ListBarView.DEFAULT_TEMPLATE)
+        return send_http_request(
+            request,
+            ListBarView.get_default_bars(),
+            ListBarView.DEFAULT_TEMPLATE
+        )
 
     @staticmethod
     def get_default_bars() -> QuerySet:
@@ -50,7 +59,9 @@ class SearchBarView(DetailView):
     @staticmethod
     def search_bar_models() -> QuerySet:
         bar_list = Bar.objects.filter(
-            Q(bar_name__icontains=RequestHelper.bar_search_request)
+            Q(
+                bar_name__icontains=RequestHelper.bar_search_request
+            )
         )
         return bar_list.order_by('-bar_name')[:]
 
@@ -121,7 +132,9 @@ class RecommendBarView(DetailView):
             raise ValueError(f"Requested {number} bars than total {len(bars)} bars!")
 
         return Bar.objects.filter(
-            Q(bar_name__in=[bar.bar_name for bar in bars[:number]])
+            Q(
+                bar_name__in=[bar.bar_name for bar in bars[:number]]
+            )
         )
 
     @staticmethod
@@ -130,13 +143,21 @@ class RecommendBarView(DetailView):
         popular_scores = RecommendBarView.rank_popular_bars(bars)
         for index, bar in enumerate(secure_scores):
             secure_scores[bar] += popular_scores[bar]
-        sorted_total_scores = sorted(secure_scores.items(), key=lambda item: item[1], reverse=True)
+
+        sorted_total_scores = sorted(
+            secure_scores.items(),
+            key=lambda item: item[1],
+            reverse=True
+        )
         return [x[0] for x in sorted_total_scores]
 
     @staticmethod
     def rank_secure_bars(bars: List[Bar]) -> Dict[Bar, int]:
         bar_secure_scores: Dict[Bar, int] = {bar: 0 for bar in bars}
-        sorted_bars = sorted(bars, key=lambda bar: bar.occupant_rate)
+        sorted_bars = sorted(
+            bars,
+            key=lambda bar: bar.occupant_rate
+        )
         for index, bar in enumerate(sorted_bars):
             bar_secure_scores[bar] = RecommendBarView.get_secure_score(index / len(sorted_bars))
         return bar_secure_scores
@@ -144,7 +165,10 @@ class RecommendBarView(DetailView):
     @staticmethod
     def rank_popular_bars(bars: List[Bar]) -> Dict[Bar, int]:
         bar_popular_scores: Dict[Bar, int] = {bar: 0 for bar in bars}
-        sorted_bars = sorted(bars, key=lambda bar: bar.bar_rating)
+        sorted_bars = sorted(
+            bars,
+            key=lambda bar: bar.bar_rating
+        )
         for index, bar in enumerate(sorted_bars):
             bar_popular_scores[bar] += RecommendBarView.get_popular_score(index / len(sorted_bars))
         return bar_popular_scores
@@ -181,4 +205,4 @@ class RecommendBarView(DetailView):
 def get_bar_details(request, bar_id: int) -> HttpResponse:
     bar = Bar.objects.get(id=bar_id)
     bar_name = bar.bar_name
-    return HttpResponse("You're looking at bar %s." % bar_name)
+    return HttpResponse(f"You're looking at bar {bar_name}.")
