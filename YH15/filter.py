@@ -37,12 +37,13 @@ class BarFilter:
     @staticmethod
     def get_filter_source() -> QuerySet:
         if BarFilter.is_reuse_bar_search_query():
-            bar_list = Bar.objects.filter(
-                Q(bar_name__icontains=RequestHelper.bar_search_request)
+            return Bar.objects.filter(
+                Q(
+                    bar_name__icontains=RequestHelper.bar_search_request
+                )
             )
-        else:
-            bar_list = Bar.objects.order_by('-bar_rating')[:]
-        return bar_list
+
+        return Bar.objects.order_by('-bar_rating')[:]
 
     @staticmethod
     def get_filter_request(request) -> Iterable[Numeric]:
