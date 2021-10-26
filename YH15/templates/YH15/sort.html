@@ -5,6 +5,16 @@
 </head>
 <body>
 
+<br>
+<a class="btn btn-primary" href="/YH15/">Back to Homepage</a>
+<br>
+
+<form method="GET" action ="{% url 'recommend' %}">
+    {% csrf_token %}
+    <input type="submit" value="Get a recommendation from current list">
+</form>
+<br>
+
 <table border="1">
     <tr>
         <td>Index</td>
@@ -23,8 +33,7 @@
     </tr>
     {% endfor %}
 </table>
-<br>
-<a class="btn btn-primary" href="/YH15/">Back to Homepage</a>
+
 
 </body>
 </html>

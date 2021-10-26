@@ -28,6 +28,9 @@ class Bar(models.Model):
             return self.bar_name == other.bar_name and self.bar_rating == other.bar_rating and self.bar_capacity == other.bar_capacity and self.bar_occupancy == other.bar_occupancy
         return False
 
+    def __hash__(self) -> int:
+        return hash(self.bar_name) + hash(self.bar_rating)
+
     def clean_fields(self, exclude=None) -> None:
         if self.bar_rating < 0 or self.bar_rating > self.MAX_BAR_RATING:
             raise ValidationError(f'Invalid bar rating value {self.bar_rating}')
@@ -54,3 +57,7 @@ class Bar(models.Model):
         if self.bar_occupancy - n < 0:
             raise ValueError(f"Less {n} customers in the bar!")
         self.bar_occupancy -= n
+
+    @property
+    def occupant_rate(self):
+        return self.bar_occupancy / self.bar_capacity

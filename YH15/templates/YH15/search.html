@@ -36,6 +36,12 @@
 </form>
 <br>
 
+<form method="GET" action ="{% url 'recommend' %}">
+    {% csrf_token %}
+    <input type="submit" value="Get a recommendation from current list">
+</form>
+<br>
+
 <table border="1">
     <tr>
         <td>Index</td>
