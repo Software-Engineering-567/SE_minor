@@ -14,7 +14,9 @@ BAR_SEARCH = None
 BAR_FILTER = None
 """Cache the existing filter request, prepare for a possible next user request."""
 
+
 def get_current_bar_query() -> QuerySet:
+    """Return the cached filter or search query."""
     global BAR_SEARCH
     bar_search = BAR_SEARCH
     global BAR_FILTER
@@ -112,12 +114,6 @@ class FilterBarView(DetailView):
         return HttpResponse(template.render(context, request))
 
 
-def get_bar_details(request, bar_id: int) -> HttpResponse:
-    bar = Bar.objects.get(id=bar_id)
-    bar_name = bar.bar_name
-    return HttpResponse("You're looking at bar %s." % bar_name)
-
-
 class RecommendBarView(DetailView):
     DEFAULT_TEMPLATE = 'YH15/recommend.html'
 
@@ -192,3 +188,9 @@ class RecommendBarView(DetailView):
         if 0 < bar_popular_score <= 0.4:
             return 3
         return 0
+
+
+def get_bar_details(request, bar_id: int) -> HttpResponse:
+    bar = Bar.objects.get(id=bar_id)
+    bar_name = bar.bar_name
+    return HttpResponse("You're looking at bar %s." % bar_name)
