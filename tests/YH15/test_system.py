@@ -1,18 +1,16 @@
+from typing import List
+from unittest.mock import MagicMock, patch
+
 from django.test import TestCase, RequestFactory
 
-from typing import List
 from YH15.models import Bar
-from tests.YH15.test_views import create_test_bar_list
-from unittest.mock import MagicMock, patch
 from YH15.views import (
     ListBarView,
     FilterBarView,
     SearchBarView,
     RecommendBarView,
 )
-
-from YH15 import views as views
-from YH15.request_helper import RequestHelper
+from tests.YH15.test_views import create_test_bar_list
 
 
 class TestBarRecommendation(TestCase):

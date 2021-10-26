@@ -1,6 +1,6 @@
-from django.test import TestCase, RequestFactory
-
 from typing import List, Dict
+
+from django.test import TestCase, RequestFactory
 
 from YH15.models import Bar
 import YH15.views as views
@@ -9,7 +9,6 @@ from YH15.views import (
     SortBarView,
     get_bar_details,
     RecommendBarView,
-    FilterBarView,
 )
 from YH15.filter import BarFilter
 

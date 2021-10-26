@@ -4,7 +4,6 @@ from django.db.models.query import QuerySet
 from django.db.models import Q
 
 from YH15.models import Bar, Numeric
-from YH15 import views as views
 from YH15.request_helper import RequestHelper
 
 
