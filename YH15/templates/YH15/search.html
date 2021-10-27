@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<a class="btn btn-primary" href="/YH15/">Back to Homepage</a>
+<a class="btn btn-primary" href="/">Back to Homepage</a>
 <br>
 <br>
 
@@ -53,7 +53,7 @@
     {% for bar in bar_list %}
     <tr>
         <td>{{ forloop.counter }}</td>
-        <td><a href="/YH15/{{ bar.id }}/">{{ bar.bar_name }}</a></td>
+        <td><a href="{{ bar.bar_url }}">{{ bar.bar_name }}</a></td>
         <td>{{ bar.bar_rating }}</td>
         <td>{{ bar.bar_capacity }}</td>
         <td>{{ bar.bar_occupancy }}</td>

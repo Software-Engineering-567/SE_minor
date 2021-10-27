@@ -27,6 +27,8 @@ class Bar(models.Model):
         validators=[MaxValueValidator(bar_capacity), MinValueValidator(0)]
     )
 
+    bar_url = models.CharField(max_length=300)
+
     def __eq__(self, other) -> bool:
         if isinstance(other, Bar):
             return self.bar_name == other.bar_name and self.bar_rating == other.bar_rating and self.bar_capacity == other.bar_capacity and self.bar_occupancy == other.bar_occupancy
@@ -64,4 +66,4 @@ class Bar(models.Model):
 
     @property
     def occupant_rate(self):
-        return self.bar_occupancy / self.bar_capacity
+        return self.bar_occupancy / (self.bar_capacity+1)

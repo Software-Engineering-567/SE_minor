@@ -31,6 +31,7 @@ class ListBarView(DetailView):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         RequestHelper.reset_search_request()
         RequestHelper.reset_filter_request()
+        
         return send_http_request(
             request,
             ListBarView.get_default_bars(),
@@ -102,7 +103,7 @@ class FilterBarView(DetailView):
         return send_http_request(
             request,
             FilterBarView.filter_bars(request),
-            SortBarView.DEFAULT_TEMPLATE,
+            FilterBarView.DEFAULT_TEMPLATE,
         )
 
     @staticmethod

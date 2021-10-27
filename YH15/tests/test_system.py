@@ -10,8 +10,7 @@ from YH15.views import (
     SearchBarView,
     RecommendBarView,
 )
-from tests.YH15.test_views import create_test_bar_list
-
+from YH15.tests.test_views import create_test_bar_list
 
 class TestBarRecommendation(TestCase):
     def setUp(self) -> None:
@@ -26,6 +25,7 @@ class TestBarRecommendation(TestCase):
                    ):
             request = self.factory.get("/YH15/")
             response = RecommendBarView().get(request)
+            
             self.assertEqual(
                 response.headers,
                 {'Content-Type': 'text/html; charset=utf-8'}
@@ -104,7 +104,7 @@ class TestBarList(TestCase):
 
         self.assertEqual(
             len(response.content),
-            3270,
+            3187,
         )
 
 
@@ -127,7 +127,7 @@ class TestBarSearch(TestCase):
 
         self.assertEqual(
             len(response.content),
-            3125,
+            3033,
         )
 
 
@@ -147,5 +147,5 @@ class TestBarFilter(TestCase):
 
         self.assertEqual(
             len(response.content),
-            609,
+            2583,
         )

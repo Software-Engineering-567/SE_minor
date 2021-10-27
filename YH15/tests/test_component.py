@@ -14,7 +14,7 @@ from YH15.views import (
 
 from YH15 import views as views
 from YH15.request_helper import RequestHelper
-from tests.YH15.test_views import create_test_bar_list
+from YH15.tests.test_views import create_test_bar_list
 
 
 class TestBarRecommendation(TestCase):

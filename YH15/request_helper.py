@@ -42,7 +42,7 @@ class RequestHelper:
 
     @staticmethod
     def cache_filter_request(filter_query: QuerySet) -> None:
-        RequestHelper.bar_search_request = filter_query
+        RequestHelper.bar_filter_request = filter_query
         return None
 
     @staticmethod

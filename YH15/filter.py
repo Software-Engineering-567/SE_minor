@@ -11,9 +11,7 @@ class BarFilter:
     @staticmethod
     def filter_bars(request) -> QuerySet:
         bar_list = BarFilter.get_filter_source()
-
         filter_rating, filter_capacity, filter_occupancy = BarFilter.get_filter_request(request)
-
         if BarFilter.is_empty_filter_condition(filter_rating, filter_capacity, filter_occupancy):
             filter_rating, filter_capacity, filter_occupancy = BarFilter.update_empty_filter_conditions(
                 [
